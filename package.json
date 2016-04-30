@@ -1,0 +1,25 @@
+{
+  "name": "blockedmc-website",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BlockedServersMC/Website.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BlockedServersMC/Website/issues"
+  },
+  "homepage": "https://github.com/BlockedServersMC/Website#readme",
+  "dependencies": {
+    "body-parser": "^1.15.0",
+    "express": "^4.13.4",
+    "jethro": "^2.7.1",
+    "mongoose": "^4.4.14"
+  }
+}
