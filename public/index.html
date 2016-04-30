@@ -59,6 +59,7 @@
 						$('#search').attr("disabled", true);
 						jQuery.getJSON("/check/"+ip.toLowerCase(), function(data) {
 							$('#search').attr("disabled", false);
+                                                        $('#search').focus();
 							var panel = $("#panel");
 							var panelText = $("#panel-text");
 							panel.removeClass('red');
