@@ -66,7 +66,7 @@
 							if(data.success) {
 								if(data.blocked) {
 									panel.addClass('red');
-									panelText.text("\""+ip+"\" is currently being blocked by Mojang! Has been blocked since "+new Date(data.lastBlocked).toLocaleFormat('%d-%b-%Y')+"!");
+									panelText.text("\""+ip+"\" is currently being blocked by Mojang! Has been blocked since "+new Date(data.lastBlocked)+"!");
 								} else {
 									panel.addClass('green');
 									panelText.text("\""+ip+"\" is not currently being blocked by Mojang!");
