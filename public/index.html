@@ -49,7 +49,7 @@
 					timer && clearTimeout(timer);
 					timer = setTimeout(function() {
 						var ip = $('#search').val();
-						
+
 						if(ip.indexOf(" ")>=0) {
 							return;
 						}
@@ -59,7 +59,7 @@
 						$('#search').attr("disabled", true);
 						jQuery.getJSON("/check/"+ip.toLowerCase(), function(data) {
 							$('#search').attr("disabled", false);
-                                                        $('#search').focus();
+							$('#search').focus();
 							var panel = $("#panel");
 							var panelText = $("#panel-text");
 							panel.removeClass('red');
