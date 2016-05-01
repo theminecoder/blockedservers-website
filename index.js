@@ -41,6 +41,13 @@ app.get('/check', function(req, res) {
 });
 
 app.get('/check/:query', function(req, res) {
+	if(!/^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3})$|^((([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9]))$/.test(req.params.query.toLowerCase())) {
+		res.json({
+			success: false,
+			message: "Invalid query!"
+		}).status(500).end();
+		return;
+	}
 	new IPHash({
 		_id: sha1(req.params.query.toLowerCase()),
 		hostname: req.params.query.toLowerCase()
