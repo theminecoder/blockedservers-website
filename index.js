@@ -6,7 +6,7 @@ var crypto = require('crypto'),
 	express = require('express'),
 	app = express(),
 	mongoose = require('mongoose');
-	
+
 function log(severity, message, service) {
     if(!service) service = "app";
     jethro(severity, service, message);
@@ -26,7 +26,7 @@ var Server = mongoose.model('Server', {
 		_id: String,
 		hostname: String
 	});
-	
+
 app.use(jethro.express);
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
@@ -34,18 +34,18 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/check', function(req, res) {
-	res.json({
+	res.status(400).json({
 		success: false,
 		message: "Missing query!"
-	}).status(500).end();
+	}).end();
 });
 
 app.get('/check/:query', function(req, res) {
 	if(!/^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3})$|^((([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9]))$/.test(req.params.query.toLowerCase())) {
-		res.json({
+		res.status(400).json({
 			success: false,
 			message: "Invalid query!"
-		}).status(500).end();
+		}).end();
 		return;
 	}
 	new IPHash({
@@ -54,25 +54,25 @@ app.get('/check/:query', function(req, res) {
 	}).save();
 	Server.findOne({_id: sha1(req.params.query.toLowerCase())}, function(err, server) {
 		if(err) {
-			res.json({
+			res.status(500).json({
 				success: false,
 				message: "Database error!"
-			}).status(500).end();
+			}).end();
 			log('error', err, "mongoose");
 			return;
 		}
-		if(server==null) {
+		if(server===null) {
 			res.json({
 				success: true,
 				blocked: false,
 				lastBlocked: null
-			}).end()
+			}).end();
 		} else {
-			if(server.hostname==null) {
+			if(server.hostname===null) {
 				server.hostname = req.params.query.toLowerCase();
 				server.save();
 			}
-			res.json({
+			res.status(200).json({
 				success: true,
 				blocked: server.currentlyBlocked,
 				lastBlocked: server.lastBlocked
@@ -90,6 +90,6 @@ mongoose.connect(process.env.MONGO_URL||'mongodb://localhost/test', function(err
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function() {
-	http.createServer(app).listen(process.env.PORT||3000, process.env.HOST||"0.0.0.0")
+	http.createServer(app).listen(process.env.PORT||3000, process.env.HOST||"0.0.0.0");
 	log("debug", "Spawned Express on "+(process.env.HOST||"0.0.0.0")+":"+(process.env.PORT||3000), "express");
 });
