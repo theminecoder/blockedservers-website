@@ -21,6 +21,10 @@ var Server = mongoose.model('Server', {
 		hostname: String,
 		currentlyBlocked: Boolean,
 		lastBlocked: Date
+	}),
+	IPHash = mongoose.model('IPHash', {
+		_id: String,
+		hostname: String
 	});
 	
 app.use(jethro.express);
@@ -37,7 +41,11 @@ app.get('/check', function(req, res) {
 });
 
 app.get('/check/:query', function(req, res) {
-	Server.findOne({_id: sha1(req.params.query)}, function(err, server) {
+	new IPHash({
+		_id: sha1(req.params.query.toLowerCase()),
+		hostname: req.params.query.toLowerCase()
+	}).save();
+	Server.findOne({_id: sha1(req.params.query.toLowerCase())}, function(err, server) {
 		if(err) {
 			res.json({
 				success: false,
