@@ -20,6 +20,7 @@ var Server = mongoose.model('Server', {
 		_id: String,
 		hostname: String,
 		currentlyBlocked: Boolean,
+		hostnameFound: Boolean,
 		lastBlocked: Date
 	}),
 	IPHash = mongoose.model('IPHash', {
@@ -70,6 +71,7 @@ app.get('/check/:query', function(req, res) {
 		} else {
 			if(server.hostname===null) {
 				server.hostname = req.params.query.toLowerCase();
+				server.hostnameFound = true;
 				server.save();
 			}
 			res.status(200).json({
