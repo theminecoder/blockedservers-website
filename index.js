@@ -62,7 +62,7 @@ app.get('/check/:query', function(req, res) {
 		});
 	}
 	if(!isIp && ipSplit.length>=2) {
-		smallIp = ipSplit[ip.length-2]+"."+ipSplit[ip.length-1];
+		smallIp = ipSplit[ipSplit.length-2]+"."+ipSplit[ipSplit.length-1];
 	}
 	new IPHash({
 		_id: sha1(req.params.query.toLowerCase()),
