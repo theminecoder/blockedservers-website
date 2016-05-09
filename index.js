@@ -96,10 +96,15 @@ app.get('/check/:query', function(req, res) {
 				lastBlocked: null
 			}).end();
 		} else {
-			if(server.hostname===null) {
-				server.hostname = req.params.query.toLowerCase();
-				server.hostnameFound = true;
-				server.save();
+			if(server.hostname == null) {
+				IPHash.find({_id: server._id}, function(err, ipHash) {
+					if(err) {
+						log('error', err, 'mongo');
+					}
+					server.hostname = ipHash==null || !ipHash.hostname ? req.params.query.toLowerCase() : ipHash.hostname;
+					server.hostnameFound = true;
+					server.save();
+				}
 			}
 			res.status(200).json({
 				success: true,
