@@ -49,7 +49,7 @@ app.get('/check/:query', function(req, res) {
 		}).end();
 		return;
 	}
-	var ipSplit = line.toLowerCase().split(".");
+	var ipSplit = req.params.query.toLowerCase().split(".");
 	var isIp = ip.length == 4;
 	var smallIp;
 	if(isIp) {
