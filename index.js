@@ -49,11 +49,32 @@ app.get('/check/:query', function(req, res) {
 		}).end();
 		return;
 	}
+	var ipSplit = line.toLowerCase().split(".");
+	var isIp = ip.length == 4;
+	var smallIp;
+	if(isIp) {
+		ipSplit.map(function(part) {
+			try {
+				new Number(part);
+			} catch (ex) {
+				isIp = false;
+			}
+		});
+	}
+	if(!isIp && ipSplit.length>=2) {
+		smallIp = ip[ip.length-2]+"."+ip[ip.length-1];
+	}
 	new IPHash({
 		_id: sha1(req.params.query.toLowerCase()),
 		hostname: req.params.query.toLowerCase()
 	}).save();
-	Server.findOne({_id: sha1(req.params.query.toLowerCase())}, function(err, server) {
+	if(smallIp) {
+		new IPHash({
+			_id: sha1(smallIp.toLowerCase()),
+			hostname: smallIp.toLowerCase()
+		}).save();
+	}
+	Server.findOne((smallIp ? {_id: sha1(req.params.query.toLowerCase())} : {$or: [{_id: sha1(req.params.query.toLowerCase())}, {_id: sha1(smallIp)}]}), function(err, server) {
 		if(err) {
 			res.status(500).json({
 				success: false,
