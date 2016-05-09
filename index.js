@@ -69,13 +69,18 @@ app.get('/check/:query', function(req, res) {
 		_id: sha1(req.params.query.toLowerCase()),
 		hostname: req.params.query.toLowerCase()
 	}).save();
-	if(smallIp) {
+	if(smallIp!=null) {
 		new IPHash({
 			_id: sha1(smallIp.toLowerCase()),
 			hostname: smallIp.toLowerCase()
 		}).save();
+		new IPHash({
+			_id: sha1(starIp.toLowerCase()),
+			hostname: starIp.toLowerCase()
+		}).save();
 	}
-	Server.findOne((smallIp ? {_id: sha1(req.params.query.toLowerCase())} : {$or: [{_id: sha1(req.params.query.toLowerCase())}, {_id: sha1(smallIp)}, {_id: sha1(starIp)}]}), function(err, server) {
+	var query = (smallIp==null ? {_id: sha1(req.params.query.toLowerCase())} : {$or: [{_id: sha1(req.params.query.toLowerCase())}, {_id: sha1(smallIp)}, {_id: sha1(starIp)}]});
+	Server.findOne(query, function(err, server) {
 		if(err) {
 			res.status(500).json({
 				success: false,
