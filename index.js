@@ -96,21 +96,29 @@ app.get('/check/:query', function(req, res) {
 				lastBlocked: null
 			}).end();
 		} else {
-			if(server.hostname == null) {
-				IPHash.find({_id: server._id}, function(err, ipHash) {
-					if(err) {
-						log('error', err, 'mongo');
-					}
-					server.hostname = ipHash==null || !ipHash.hostname ? req.params.query.toLowerCase() : ipHash.hostname;
-					server.hostnameFound = true;
-					server.save();
-				}
-			}
 			res.status(200).json({
 				success: true,
 				blocked: server.currentlyBlocked,
 				lastBlocked: server.lastBlocked
-			}).end();
+			});
+			if(server.hostname == null) {
+				IPHash.find({_id: server._id}, function(err, ipHash) {
+					console.log(ipHash);
+					if(err) {
+						log('error', err, 'mongo');
+					}
+					server.hostname = (ipHash==null || ipHash.hostname==null ? req.params.query.toLowerCase() : ipHash.hostname);
+					server.hostnameFound = true;
+					server.save(function(err){
+						if(err) {
+							log('error', err, 'mongo');
+						}
+						res.end();
+					});
+				});
+			} else {
+				res.end();
+			}
 		}
 	});
 });
