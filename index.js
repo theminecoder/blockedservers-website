@@ -50,7 +50,7 @@ app.get('/check/:query', function(req, res) {
 		return;
 	}
 	var ipSplit = req.params.query.toLowerCase().split(".");
-	var isIp = ip.length == 4;
+	var isIp = ipSplit.length == 4;
 	var smallIp;
 	if(isIp) {
 		ipSplit.map(function(part) {
