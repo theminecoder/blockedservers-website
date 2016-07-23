@@ -20,6 +20,6 @@
     "body-parser": "^1.15.1",
     "express": "^4.13.4",
     "jethro": "^2.7.1",
-    "mongoose": "^4.4.19"
+    "mongoose": "^4.5.6"
   }
 }
