@@ -18,7 +18,7 @@
   "homepage": "https://github.com/BlockedServersMC/Website#readme",
   "dependencies": {
     "body-parser": "^1.15.1",
-    "express": "^4.13.4",
+    "express": "^4.14.1",
     "jethro": "^2.7.1",
     "mongoose": "^4.4.19"
   }
