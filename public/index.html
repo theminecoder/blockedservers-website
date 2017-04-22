@@ -86,7 +86,7 @@
 				}
 
                 function updateHashCount() {
-                    jQuery.getJson("/count", function (data) {
+                    jQuery.getJSON("/count", function (data) {
                         if(data.success) {
                             $("#hashcount").text(data.count.toLocaleString());
                         }
