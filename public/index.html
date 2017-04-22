@@ -85,13 +85,15 @@
 					$('#search').keyup();
 				}
 
-				setInterval(function() {
-				    $.getJson("/count", function (data) {
-						if(data.success) {
-						    $("#hashcount").text(data.count.toLocaleString());
-						}
+                function updateHashCount() {
+                    $.getJson("/count", function (data) {
+                        if(data.success) {
+                            $("#hashcount").text(data.count.toLocaleString());
+                        }
                     })
-				})
+                }
+				setInterval(updateHashCount, 5000);
+				updateHashCount();
 			});
 		</script>
 	</body>
