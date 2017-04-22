@@ -34,6 +34,23 @@ app.use(bodyParser.json());
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.get('/count', function (req, res) {
+	IPHash.count({}, function (err, count) {
+		if(err) {
+            res.status(500).json({
+                success: false,
+                message: "Database error!"
+            }).end();
+            log('error', err, "mongoose");
+		}
+
+        res.status(200).json({
+            success: true,
+			count: count
+        }).end();
+    })
+});
+
 app.get('/check', function(req, res) {
 	res.status(400).json({
 		success: false,
