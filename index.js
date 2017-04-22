@@ -52,6 +52,7 @@ app.get('/check/:query', function(req, res) {
 	var ipSplit = req.params.query.toLowerCase().split(".");
 	var isIp = ipSplit.length == 4;
 	var smallIp, starIp;
+	var otherStars = [];
 	if(isIp) {
 		ipSplit.map(function(part) {
 			try {
@@ -64,6 +65,11 @@ app.get('/check/:query', function(req, res) {
 	if(!isIp && ipSplit.length>=2) {
 		smallIp = ipSplit[ipSplit.length-2]+"."+ipSplit[ipSplit.length-1];
 		starIp = "*."+ipSplit[ipSplit.length-2]+"."+ipSplit[ipSplit.length-1];
+		while (ipSplit.length > 3) {
+                    ipSplit[0] = "*";
+                    otherStars.push(ipSplit.join("."))
+                    ipSplit.shift()
+                }
 	}
 	new IPHash({
 		_id: sha1(req.params.query.toLowerCase()),
@@ -78,6 +84,12 @@ app.get('/check/:query', function(req, res) {
 			_id: sha1(starIp.toLowerCase()),
 			hostname: starIp.toLowerCase()
 		}).save();
+		otherStars.map(function (star) {
+                    new IPHash({
+                        _id: sha1(star.toLowerCase()),
+                        hostname: star.toLowerCase()
+                    }).save();
+                });
 	}
 	var query = (smallIp==null ? {_id: sha1(req.params.query.toLowerCase())} : {$or: [{_id: sha1(req.params.query.toLowerCase())}, {_id: sha1(smallIp)}, {_id: sha1(starIp)}]});
 	Server.findOne(query, function(err, server) {
