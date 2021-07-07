@@ -20,6 +20,7 @@
     "body-parser": "^1.15.1",
     "express": "^4.13.4",
     "jethro": "^2.7.1",
+    "minecraft-protocol": "^1.25.0",
     "mongoose": "^5.7.7"
   }
 }

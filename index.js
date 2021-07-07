@@ -35,20 +35,20 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/count', function (req, res) {
-    IPHash.count({}, function (err, count) {
-        if (err) {
-            res.status(500).json({
-                success: false,
-                message: "Database error!"
-            }).end();
-            log('error', err, "mongoose");
-        }
+    // IPHash.count({}, function (err, count) {
+    //     if (err) {
+    //         res.status(500).json({
+    //             success: false,
+    //             message: "Database error!"
+    //         }).end();
+    //         log('error', err, "mongoose");
+    //     }
 
         res.status(200).json({
             success: true,
-            count: count
+            count: 1
         }).end();
-    })
+    // })
 });
 
 app.get('/check', function (req, res) {
@@ -58,13 +58,27 @@ app.get('/check', function (req, res) {
     }).end();
 });
 
-async function doCheck(server) {
+function validateQuery(server) {
     if (!/^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3})$|^((([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9]))$/.test(server.toLowerCase())) {
         return {
             success: false,
             message: "Invalid query!"
         }
     }
+    return null;
+}
+
+async function doCheck(server) {
+    const validation = validateQuery(server);
+    if (validation) {
+        return validation;
+    }
+    return {
+        success: true,
+        blocked: false,
+        lastBlocked: null
+    }
+
     const ipSplit = server.toLowerCase().split(".");
     let isIp = ipSplit.length === 4;
     let smallIp, starIp;
@@ -136,6 +150,51 @@ async function doCheck(server) {
     }
 }
 
+async function doPing(server) {
+    const validation = validateQuery(server);
+    if (validation) {
+        return validation;
+    }
+    return new Promise(resolve => {
+        const mc = require('minecraft-protocol');
+        const client = mc.createClient({
+            host: server,
+            username: "Dinnerbone", // some random exisiting account
+            profilesFolder: false
+        });
+        // disconnect packet, assume we got kicked for not auth'd
+        client.on('disconnect', (packet) => {
+            client.end();
+            resolve({
+                success: true,
+                offlineMode: false,
+                reason: packet.reason
+            });
+        });
+        // login success -> offline server
+        client.on('success', (packet) => {
+            client.end();
+            resolve({
+                success: true,
+                offlineMode: true
+            });
+        });
+        // error? -> error
+        client.on('error', (error) => {
+            resolve({
+                success: false,
+                error: error
+            })
+        });
+        client.on('end', (error) => {
+            resolve({
+                success: false,
+                error: error
+            })
+        });
+    });
+}
+
 app.get('/check/:query', async function (req, res) {
     res.json(await doCheck(req.params.query))
 });
@@ -146,15 +205,19 @@ app.post('/check-bulk', async function (req, res) {
     })))
 })
 
-mongoose.connect(process.env.MONGO_URL || 'mongodb://localhost/test', function (err) {
-    if (err) {
-        console.log(err);
-        process.exit(1);
-    }
+app.get('/ping/:query', async function (req, res) {
+    res.json(await doPing(req.params.query))
 });
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', function () {
+
+// mongoose.connect(process.env.MONGO_URL || 'mongodb://localhost/test', function (err) {
+//     if (err) {
+//         console.log(err);
+//         process.exit(1);
+//     }
+// });
+// const db = mongoose.connection;
+// db.on('error', console.error.bind(console, 'connection error:'));
+// db.once('open', function () {
     http.createServer(app).listen(process.env.PORT || 3000, process.env.HOST || "0.0.0.0");
     log("debug", "Spawned Express on " + (process.env.HOST || "0.0.0.0") + ":" + (process.env.PORT || 3000), "express");
-});
+// });
