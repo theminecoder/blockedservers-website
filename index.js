@@ -35,20 +35,20 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/count', function (req, res) {
-    // IPHash.count({}, function (err, count) {
-    //     if (err) {
-    //         res.status(500).json({
-    //             success: false,
-    //             message: "Database error!"
-    //         }).end();
-    //         log('error', err, "mongoose");
-    //     }
+    IPHash.count({}, function (err, count) {
+        if (err) {
+            res.status(500).json({
+                success: false,
+                message: "Database error!"
+            }).end();
+            log('error', err, "mongoose");
+        }
 
         res.status(200).json({
             success: true,
-            count: 1
+            count: count
         }).end();
-    // })
+    })
 });
 
 app.get('/check', function (req, res) {
@@ -72,11 +72,6 @@ async function doCheck(server) {
     const validation = validateQuery(server);
     if (validation) {
         return validation;
-    }
-    return {
-        success: true,
-        blocked: false,
-        lastBlocked: null
     }
 
     const ipSplit = server.toLowerCase().split(".");
@@ -209,15 +204,15 @@ app.get('/ping/:query', async function (req, res) {
     res.json(await doPing(req.params.query))
 });
 
-// mongoose.connect(process.env.MONGO_URL || 'mongodb://localhost/test', function (err) {
-//     if (err) {
-//         console.log(err);
-//         process.exit(1);
-//     }
-// });
-// const db = mongoose.connection;
-// db.on('error', console.error.bind(console, 'connection error:'));
-// db.once('open', function () {
+mongoose.connect(process.env.MONGO_URL || 'mongodb://localhost/test', function (err) {
+    if (err) {
+        console.log(err);
+        process.exit(1);
+    }
+});
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function () {
     http.createServer(app).listen(process.env.PORT || 3000, process.env.HOST || "0.0.0.0");
     log("debug", "Spawned Express on " + (process.env.HOST || "0.0.0.0") + ":" + (process.env.PORT || 3000), "express");
-// });
+});
