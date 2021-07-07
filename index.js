@@ -6,6 +6,8 @@ const crypto = require('crypto'),
     express = require('express'),
     app = express(),
     mongoose = require('mongoose');
+    mc = require('minecraft-protocol');
+    McChat = require('prismarine-chat')('1.16');
 
 function log(severity, message, service) {
     if (!service) service = "app";
@@ -151,7 +153,6 @@ async function doPing(server) {
         return validation;
     }
     return new Promise(resolve => {
-        const mc = require('minecraft-protocol');
         const client = mc.createClient({
             host: server,
             username: "Dinnerbone", // some random exisiting account
@@ -160,10 +161,16 @@ async function doPing(server) {
         // disconnect packet, assume we got kicked for not auth'd
         client.on('disconnect', (packet) => {
             client.end();
+            var reason = packet.reason;
+            try {
+                reason = new McChat(JSON.parse(packet.reason)).toString()
+            } catch (e) {
+                // ignored
+            }
             resolve({
                 success: true,
                 offlineMode: false,
-                reason: packet.reason
+                reason: reason
             });
         });
         // login success -> offline server

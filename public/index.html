@@ -88,7 +88,11 @@
 										} else if (data.offlineMode) {
 											panelText.html(text + "<br> Server is using offline mode!");
 										} else {
-											panelText.html(text + "<br> Server aborted the join process, it's either using online mode or a whitelist.");
+											text += "<br> Server aborted the join process, it's either using online mode or a whitelist."
+											if (data.reason) {
+												text += "<br> Reason was: \""+ data.reason + "\"";
+											}
+											panelText.html(text);
 										}
 									});
 								});
