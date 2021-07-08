@@ -155,7 +155,7 @@ async function doPing(server) {
     return new Promise(resolve => {
         const client = mc.createClient({
             host: server,
-            username: "Dinnerbone", // some random exisiting account
+            username: "BlockedServers", // some random exisiting account
             profilesFolder: false
         });
         // disconnect packet, assume we got kicked for not auth'd
