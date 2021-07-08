@@ -6,6 +6,8 @@ const crypto = require('crypto'),
     express = require('express'),
     app = express(),
     mongoose = require('mongoose');
+    mc = require('minecraft-protocol');
+    McChat = require('prismarine-chat')('1.16');
 
 function log(severity, message, service) {
     if (!service) service = "app";
@@ -58,13 +60,22 @@ app.get('/check', function (req, res) {
     }).end();
 });
 
-async function doCheck(server) {
+function validateQuery(server) {
     if (!/^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3})$|^((([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9]))$/.test(server.toLowerCase())) {
         return {
             success: false,
             message: "Invalid query!"
         }
     }
+    return null;
+}
+
+async function doCheck(server) {
+    const validation = validateQuery(server);
+    if (validation) {
+        return validation;
+    }
+
     const ipSplit = server.toLowerCase().split(".");
     let isIp = ipSplit.length === 4;
     let smallIp, starIp;
@@ -136,6 +147,56 @@ async function doCheck(server) {
     }
 }
 
+async function doPing(server) {
+    const validation = validateQuery(server);
+    if (validation) {
+        return validation;
+    }
+    return new Promise(resolve => {
+        const client = mc.createClient({
+            host: server,
+            username: "Dinnerbone", // some random exisiting account
+            profilesFolder: false
+        });
+        // disconnect packet, assume we got kicked for not auth'd
+        client.on('disconnect', (packet) => {
+            client.end();
+            var reason = packet.reason;
+            try {
+                reason = new McChat(JSON.parse(packet.reason)).toString()
+            } catch (e) {
+                // ignored
+            }
+            resolve({
+                success: true,
+                offlineMode: false,
+                reason: reason
+            });
+        });
+        // login success -> offline server
+        client.on('success', (packet) => {
+            client.end();
+            resolve({
+                success: true,
+                offlineMode: true
+            });
+        });
+        // error? -> error
+        client.on('error', (error) => {
+            resolve({
+                success: false,
+                error: error
+            })
+        });
+        client.on('end', (error) => {
+            resolve({
+                success: false,
+                error: error
+            })
+        });
+    });
+}
+
 app.get('/check/:query', async function (req, res) {
     res.json(await doCheck(req.params.query))
 });
@@ -145,6 +206,10 @@ app.post('/check-bulk', async function (req, res) {
         return {input: server, result: await doCheck(server)};
     })))
 })
+
+app.get('/ping/:query', async function (req, res) {
+    res.json(await doPing(req.params.query))
+});
 
 mongoose.connect(process.env.MONGO_URL || 'mongodb://localhost/test', function (err) {
     if (err) {

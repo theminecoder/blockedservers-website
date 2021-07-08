@@ -52,28 +52,50 @@
 					timer = setTimeout(function() {
 						var ip = $('#search').val();
 
+						var panel = $("#panel");
+						var panelText = $("#panel-text");
 						if(ip.indexOf(" ")>=0) {
 							return;
 						}
 						if(!/^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3})$|^((([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9]))$/.test(ip)) {
+							panelText.text("Please enter a valid IP!");
+							panel.addClass('red');
+							panel.removeClass('green');
 							return;
 						}
 						$('#search').attr("disabled", true);
 						jQuery.getJSON("/check/"+ip.toLowerCase(), function(data) {
 							$('#search').attr("disabled", false);
 							$('#search').focus();
-							var panel = $("#panel");
-							var panelText = $("#panel-text");
 							panel.removeClass('red');
 							panel.removeClass('green');
 							if(data.success) {
+								var text;
 								if(data.blocked) {
 									panel.addClass('red');
-									panelText.text("\""+ip+"\" is currently being blocked by Mojang! Has been blocked since "+new Date(data.lastBlocked)+"!");
+									text = "\""+ip+"\" is currently being blocked by Mojang! Has been blocked since "+new Date(data.lastBlocked)+"!";
 								} else {
 									panel.addClass('green');
-									panelText.text("\""+ip+"\" is not currently being blocked by Mojang!");
+									text = "\""+ip+"\" is not currently being blocked by Mojang!";
 								}
+								panelText.html(text + " <a class='right waves-effect waves-light btn' id='offline-check'>Check offline mode</a>");
+								$('#offline-check').click(function () {
+									$('#offline-check').addClass('disabled');
+									jQuery.getJSON("/ping/"+ip.toLowerCase(), function(data) {
+										$('#offline-check').removeClass('disabled');
+										if (!data.success) {
+											panelText.html(text + "<br> Error while checking offline-mode status, is the server online?");
+										} else if (data.offlineMode) {
+											panelText.html(text + "<br> Server is using offline mode!");
+										} else {
+											text += "<br> Server aborted the join process, it's either using online mode or a whitelist."
+											if (data.reason) {
+												text += "<br> Reason was: \""+ data.reason + "\"";
+											}
+											panelText.html(text);
+										}
+									});
+								});
 							} else {
 								panel.addClass('red');
 								panelText.text(data.message);
