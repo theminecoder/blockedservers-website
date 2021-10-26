@@ -20,10 +20,10 @@
     "body-parser": "^1.15.1",
     "express": "^4.13.4",
     "jethro": "^2.7.1",
-    "minecraft-data": "^2.86.0",
-    "minecraft-protocol": "^1.25.0",
+    "minecraft-data": "^2.95.0",
+    "minecraft-protocol": "^1.26.5",
     "mojangson": "^2.0.2",
     "mongoose": "^5.7.7",
-    "prismarine-chat": "^1.0.4"
+    "prismarine-chat": "^1.3.3"
   }
 }
