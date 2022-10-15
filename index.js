@@ -198,7 +198,9 @@ async function doPing(server) {
 }
 
 async function doHashLookup(hash) {
-    const hashDoc = IPHash.find({_id: hash.toLowerCase()})
+    console.log("orig: "+hash)
+    console.log("fixed: "+hash.toLowerCase())
+    const hashDoc = IPHash.findOne({_id: hash.toLowerCase()})
     if(hashDoc == null || hashDoc.hostname == null) return {success: true, hostname: null}
     return {success: true, hostname: hashDoc.hostname.toLowerCase(), server: await doCheck(hashDoc.hostname)}
 }
