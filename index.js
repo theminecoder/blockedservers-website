@@ -133,8 +133,7 @@ async function doCheck(server) {
     }
 
     if (serverDoc.hostname == null) {
-        const hashDoc = IPHash.find({_id: serverDoc._id})
-        console.log(hashDoc);
+        const hashDoc = await IPHash.findOne({_id: serverDoc._id})
         serverDoc.hostname = (hashDoc == null || hashDoc.hostname == null ? server.toLowerCase() : hashDoc.hostname);
         serverDoc.hostnameFound = true;
         await serverDoc.save();
