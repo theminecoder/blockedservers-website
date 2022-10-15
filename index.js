@@ -197,6 +197,12 @@ async function doPing(server) {
     });
 }
 
+async function doHashLookup(hash) {
+    const hashDoc = IPHash.find({_id: serverDoc._id})
+    if(hashDoc == null || hashDoc.hostname == null) return {success: true, hostname: null}
+    return {success: true, hostname: hashDoc.hostname.toLowerCase(), server: await doCheck(hashDoc.hostname)}
+}
+
 app.get('/check/:query', async function (req, res) {
     res.json(await doCheck(req.params.query))
 });
@@ -209,6 +215,16 @@ app.post('/check-bulk', async function (req, res) {
 
 app.get('/ping/:query', async function (req, res) {
     res.json(await doPing(req.params.query))
+});
+
+app.get('/lookup/:hash', async function (req, res) {
+    res.json(await doHashLookup(req.params.hash)
+});
+
+app.post('/lookup-bulk', async function (req, res) {
+    res.json(await Promise.all(req.body.map(async hash => {
+        return {input: hash, result: await doHashLookup(hash)};
+    })))
 });
 
 mongoose.connect(process.env.MONGO_URL || 'mongodb://localhost/test', function (err) {
