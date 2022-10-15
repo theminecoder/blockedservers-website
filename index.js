@@ -218,7 +218,7 @@ app.get('/ping/:query', async function (req, res) {
 });
 
 app.get('/lookup/:hash', async function (req, res) {
-    res.json(await doHashLookup(req.params.hash)
+    res.json(await doHashLookup(req.params.hash))
 });
 
 app.post('/lookup-bulk', async function (req, res) {
