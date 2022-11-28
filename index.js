@@ -236,5 +236,6 @@ const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function () {
     http.createServer(app).listen(process.env.PORT || 3000, process.env.HOST || "0.0.0.0");
+    log("debug", "Hello FLY?", "express")
     log("debug", "Spawned Express on " + (process.env.HOST || "0.0.0.0") + ":" + (process.env.PORT || 3000), "express");
 });
